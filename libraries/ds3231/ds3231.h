@@ -171,6 +171,9 @@ int ds3231_set_square_wave_frequency(ds3231_t * rtc, enum SQUARE_WAVE_FREQUENCY 
 
 int ds3231_set_aging_offset(ds3231_t * rtc, int8_t offset);
 
+int ds3231_clear_alarm1(ds3231_t * rtc);
+int ds3231_clear_alarm2(ds3231_t * rtc);
+
 int ds3231_set_interrupt_callback_function(uint gpio, gpio_irq_callback_t callback);
 
 /*--------------------------------------------------------------------------------------------------------*/

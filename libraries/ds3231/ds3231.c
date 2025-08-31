@@ -753,3 +753,23 @@ int ds3231_set_interrupt_callback_function(uint gpio, gpio_irq_callback_t callba
     gpio_set_irq_enabled_with_callback(gpio, GPIO_IRQ_EDGE_FALL, true, callback);
     return 0;
 }
+
+int ds3231_clear_alarm1(ds3231_t * rtc) {
+    uint8_t status = 0;
+    if (i2c_read_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_STATUS_REG, 1, &status))
+        return -1;
+    status &= ~(0x01 << 0);
+    if (i2c_write_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_STATUS_REG, 1, &status))
+        return -1;
+    return 0;
+}
+
+int ds3231_clear_alarm2(ds3231_t * rtc) {
+    uint8_t status = 0;
+    if (i2c_read_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_STATUS_REG, 1, &status))
+        return -1;
+    status &= ~(0x01 << 1);
+    if (i2c_write_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_STATUS_REG, 1, &status))
+        return -1;
+    return 0;
+}
