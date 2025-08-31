@@ -698,7 +698,9 @@ int ds3231_read_temperature(ds3231_t * rtc, float * temperature) {
     if(i2c_read_reg(rtc->i2c, rtc->ds3231_addr, DS3231_TEMPERATURE_MSB_REG, 2, temp))
         return -1;
     
-    *temperature = temp[0] + (float)(1 / (temp[1] >> 6));
+        int16_t raw = ((int16_t)temp[0] << 8) | temp[1];
+    raw >>= 6; // sign-extend from 10 bits
+    *temperature = (float)raw * 0.25f;
     return 0;
 }
 
