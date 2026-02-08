@@ -266,6 +266,8 @@ int ds3231_read_current_time(ds3231_t * rtc, ds3231_data_t * data) {
     
     if(rtc->am_pm_mode) {
         data->hours   = 10 * ((raw_data[2] & 0x10) >> 4) + (raw_data[2] & 0x0F);
+        if (data->hours > 12) // failsafe
+            data->hours %= 12;
         data->am_pm = ((raw_data[2] & 0x20) >> 5);
         data->hours_24 = (data->hours + (12 * data->am_pm)) % 24; 
     } else {
