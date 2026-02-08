@@ -2,18 +2,20 @@
 #include "ds3231.h"
 #include <stdio.h>
 
+int isr = 0;
+
 /* A basic callback function that triggers when an alarm triggers. */
 void ds3231_interrupt_callback(uint gpio, uint32_t event_mask) {
-    printf("Alarm Enabled\n");
+    isr = 1;
 }
 
 int main() {
     /* Initilize serial communicatio.n */
     stdio_init_all();
     /* Define pins used for DS3231. */
-    uint8_t sda_pin = 12; 
-    uint8_t scl_pin = 13;
-    uint8_t int_pin = 18; 
+    uint8_t sda_pin = 4; 
+    uint8_t scl_pin = 5;
+    uint8_t int_pin = 6; 
 
     const char * days[7] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
@@ -32,8 +34,16 @@ int main() {
     ds3231_t ds3231;
 
     /* Set the desired alarm time */
-    ds3231_alarm_1_t alarm = {
+    ds3231_alarm_1_t alarm1 = {
         .seconds = 7,
+        .minutes = 25,
+        .hours = 0,
+        .date = 0,
+        .day = 0,
+        .am_pm = false
+    };
+
+    ds3231_alarm_2_t alarm2 = {
         .minutes = 25,
         .hours = 0,
         .date = 0,
@@ -62,9 +72,15 @@ int main() {
     gpio_pull_up(scl_pin);
     i2c_init(ds3231.i2c, 400 * 1000);
 
+    ds3231_deinit_alarm_1(&ds3231);
+    ds3231_deinit_alarm_2(&ds3231);
+    ds3231_enable_alarm_interrupt(&ds3231, true);
+    ds3231_clear_alarms(&ds3231, true, true);
+
     /* Update the DS3231 time registers with the desired time and set alarm 1 to send interrupt signal. */
     ds3231_configure_time(&ds3231, &ds3231_data);
-    ds3231_set_alarm_1(&ds3231, &alarm, ON_MATCHING_SECOND_AND_MINUTE);
+    //ds3231_set_alarm_1(&ds3231, &alarm1, ON_EVERY_SECOND);
+    ds3231_set_alarm_2(&ds3231, &alarm2, ON_EVERY_MINUTE);
     ds3231_set_interrupt_callback_function(int_pin, &ds3231_interrupt_callback);
 
     sleep_ms(1000);
@@ -85,5 +101,12 @@ int main() {
         gpio_put(25, 1);
         sleep_ms(500);
         #endif
+
+        if (isr)
+        {
+            isr = 0;
+            ds3231_clear_alarms(&ds3231, true, true);
+            puts("Alarm triggered");
+        }
     }
 }

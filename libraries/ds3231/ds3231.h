@@ -159,6 +159,9 @@ int ds3231_read_temperature(ds3231_t * rtc, float * resolution);
 int ds3231_set_alarm_1(ds3231_t * rtc, ds3231_alarm_1_t * alarm_time, enum ALARM_1_MASKS mask);
 int ds3231_set_alarm_2(ds3231_t * rtc, ds3231_alarm_2_t * alarm_time, enum ALARM_2_MASKS mask);
 
+int ds3231_deinit_alarm_1(ds3231_t * rtc);
+int ds3231_deinit_alarm_2(ds3231_t * rtc);
+
 int ds3231_enable_am_pm_mode(ds3231_t * rtc, bool enable);
 int ds3231_enable_alarm_interrupt(ds3231_t * rtc, bool enable);
 int ds3231_enable_oscillator(ds3231_t * rtc, bool enable);
@@ -171,8 +174,9 @@ int ds3231_set_square_wave_frequency(ds3231_t * rtc, enum SQUARE_WAVE_FREQUENCY 
 
 int ds3231_set_aging_offset(ds3231_t * rtc, int8_t offset);
 
-int ds3231_clear_alarm1(ds3231_t * rtc);
-int ds3231_clear_alarm2(ds3231_t * rtc);
+int ds3231_clear_alarm_1(ds3231_t * rtc);
+int ds3231_clear_alarm_2(ds3231_t * rtc);
+int ds3231_clear_alarms(ds3231_t * rtc, bool a1, bool a2);
 
 int ds3231_set_interrupt_callback_function(uint gpio, gpio_irq_callback_t callback);
 

@@ -294,6 +294,13 @@ int ds3231_read_current_time(ds3231_t * rtc, ds3231_data_t * data) {
  */
 int ds3231_set_alarm_1(ds3231_t * rtc, ds3231_alarm_1_t * alarm_time, enum ALARM_1_MASKS mask) {
     uint8_t temp[4] = {0, 0 , 0, 0};
+
+    if (ds3231_deinit_alarm_1(rtc))
+        return -1;
+
+    if (ds3231_enable_alarm_interrupt(rtc, true))
+        return -1;
+
     if(i2c_read_reg(rtc->i2c, rtc->ds3231_addr, DS3231_SECONDS_ALARM_1_REG, 4, temp))
         return -1;
 
@@ -428,6 +435,13 @@ int ds3231_set_alarm_1(ds3231_t * rtc, ds3231_alarm_1_t * alarm_time, enum ALARM
  */
 int ds3231_set_alarm_2(ds3231_t * rtc, ds3231_alarm_2_t * alarm_time, enum ALARM_2_MASKS mask) {
     uint8_t temp[3] = {0, 0 , 0};
+
+    if (ds3231_deinit_alarm_2(rtc))
+        return -1;
+
+    if (ds3231_enable_alarm_interrupt(rtc, true))
+        return -1;
+
     if(i2c_read_reg(rtc->i2c, rtc->ds3231_addr, DS3231_MINUTES_ALARM_2_REG, 3, temp))
         return -1;
 
@@ -524,6 +538,26 @@ int ds3231_set_alarm_2(ds3231_t * rtc, ds3231_alarm_2_t * alarm_time, enum ALARM
         return -1;
 
     if(i2c_write_reg(rtc->i2c, rtc->ds3231_addr, DS3231_MINUTES_ALARM_2_REG, 3, temp))
+        return -1;
+    return 0;
+}
+
+int ds3231_deinit_alarm_1(ds3231_t * rtc) {
+    uint8_t status = 0;
+    if (i2c_read_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_REG, 1, &status))
+        return -1;
+    status &= ~(0x01 << 0);
+    if (i2c_write_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_REG, 1, &status))
+        return -1;
+    return 0;
+}
+
+int ds3231_deinit_alarm_2(ds3231_t * rtc) {
+    uint8_t status = 0;
+    if (i2c_read_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_REG, 1, &status))
+        return -1;
+    status &= ~(0x01 << 1);
+    if (i2c_write_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_REG, 1, &status))
         return -1;
     return 0;
 }
@@ -754,7 +788,7 @@ int ds3231_set_interrupt_callback_function(uint gpio, gpio_irq_callback_t callba
     return 0;
 }
 
-int ds3231_clear_alarm1(ds3231_t * rtc) {
+int ds3231_clear_alarm_1(ds3231_t * rtc) {
     uint8_t status = 0;
     if (i2c_read_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_STATUS_REG, 1, &status))
         return -1;
@@ -764,11 +798,29 @@ int ds3231_clear_alarm1(ds3231_t * rtc) {
     return 0;
 }
 
-int ds3231_clear_alarm2(ds3231_t * rtc) {
+int ds3231_clear_alarm_2(ds3231_t * rtc) {
     uint8_t status = 0;
     if (i2c_read_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_STATUS_REG, 1, &status))
         return -1;
     status &= ~(0x01 << 1);
+    if (i2c_write_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_STATUS_REG, 1, &status))
+        return -1;
+    return 0;
+}
+
+/**
+ * @return 1 if no alarms were cleared, -1 if I2C fail, 0 if success
+ */
+int ds3231_clear_alarms(ds3231_t * rtc, bool a1, bool a2) {
+    uint8_t status = 0;
+    if (!a1 && !a2)
+        return 1;
+    if (i2c_read_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_STATUS_REG, 1, &status))
+        return -1;
+    if (a1)
+        status &= ~(0x01 << 0);
+    if (a2)
+        status &= ~(0x01 << 1);
     if (i2c_write_reg(rtc->i2c, rtc->ds3231_addr, DS3231_CONTROL_STATUS_REG, 1, &status))
         return -1;
     return 0;
