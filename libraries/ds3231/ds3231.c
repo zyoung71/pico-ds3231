@@ -185,11 +185,17 @@ int ds3231_configure_time(ds3231_t * rtc, ds3231_data_t * data) {
     if(data->minutes > 59) 
         data->minutes = 59;
 
+    if (data->hours_24 > 23)
+        data->hours_24 = 23;
+
     if(rtc->am_pm_mode) {
         if(data->hours > 12)
             data->hours = 12;
         else if(data->hours < 1)
             data->hours = 1;
+
+        if (data->hours_24 % 12 != data->hours)
+            data->hours = data->hours_24 % 12;
     } else {
         if(data->hours > 23) 
             data->hours = 23;
@@ -219,7 +225,7 @@ int ds3231_configure_time(ds3231_t * rtc, ds3231_data_t * data) {
     temp[1] = bin_to_bcd(data->minutes);
 
     if(rtc->am_pm_mode) {
-        temp[2] = bin_to_bcd_am_pm(data->hours);
+        temp[2] = bin_to_bcd_am_pm(data->hours_24);
         temp[2] |= (0x01 << 6);
     } else {
         temp[2] = bin_to_bcd(data->hours);
@@ -261,8 +267,10 @@ int ds3231_read_current_time(ds3231_t * rtc, ds3231_data_t * data) {
     if(rtc->am_pm_mode) {
         data->hours   = 10 * ((raw_data[2] & 0x10) >> 4) + (raw_data[2] & 0x0F);
         data->am_pm = ((raw_data[2] & 0x20) >> 5);
+        data->hours_24 = (data->hours + (12 * data->am_pm)) % 24; 
     } else {
         data->hours   = 10 * ((raw_data[2] & 0x30) >> 4) + (raw_data[2] & 0x0F);
+        data->hours_24 = data->hours;
     }
 
     data->day     = (raw_data[3] & (0x07));

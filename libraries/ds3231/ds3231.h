@@ -115,6 +115,7 @@ typedef struct ds3231_data_t {
     uint8_t seconds;
     uint8_t minutes;
     uint8_t hours;
+    uint8_t hours_24;
     bool    am_pm;  // false if AM, true if PM.
     uint8_t day;
     uint8_t date;

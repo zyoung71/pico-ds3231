@@ -83,6 +83,8 @@ int main() {
     ds3231_set_alarm_2(&ds3231, &alarm2, ON_EVERY_MINUTE);
     ds3231_set_interrupt_callback_function(int_pin, &ds3231_interrupt_callback);
 
+    //ds3231_enable_am_pm_mode(&ds3231, true);
+
     sleep_ms(1000);
     printf("Starting Loop:\n");
 
