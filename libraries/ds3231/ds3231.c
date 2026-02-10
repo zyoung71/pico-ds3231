@@ -193,9 +193,6 @@ int ds3231_configure_time(ds3231_t * rtc, ds3231_data_t * data) {
             data->hours = 12;
         else if(data->hours < 1)
             data->hours = 1;
-
-        if (data->hours_24 % 12 != data->hours)
-            data->hours = data->hours_24 % 12;
     } else {
         if(data->hours > 23) 
             data->hours = 23;
@@ -230,7 +227,7 @@ int ds3231_configure_time(ds3231_t * rtc, ds3231_data_t * data) {
             temp[2] |= (0x01 << 5);
         temp[2] |= (0x01 << 6);
     } else {
-        temp[2] = bin_to_bcd(data->hours);
+        temp[2] = bin_to_bcd(data->hours_24);
         temp[2] &= ~(0x01 << 6);
     }
 
