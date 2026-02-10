@@ -225,7 +225,9 @@ int ds3231_configure_time(ds3231_t * rtc, ds3231_data_t * data) {
     temp[1] = bin_to_bcd(data->minutes);
 
     if(rtc->am_pm_mode) {
-        temp[2] = bin_to_bcd_am_pm(data->hours_24);
+        temp[2] = bin_to_bcd_am_pm(data->hours); // this function is strange. will not apply the AM/PM bit
+        if (data->hours_24 > 12)
+            temp[2] |= (0x01 << 5);
         temp[2] |= (0x01 << 6);
     } else {
         temp[2] = bin_to_bcd(data->hours);
